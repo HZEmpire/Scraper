@@ -1,0 +1,23 @@
+.container {
+    width: 80%;
+    margin: 0 auto;
+    text-align: center;
+  }
+  #videoResults {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .video-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    width: 300px;
+  }
+  .video-item video {
+    width: 100%;
+  }
+  .range-slider {
+    width: 100%;
+  }
