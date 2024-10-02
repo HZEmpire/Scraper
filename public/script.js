@@ -52,6 +52,13 @@ downloadButton.addEventListener("click", () => {
     });
 });
 
+// 按下回车键搜索
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    searchButton.click();
+  }
+});
+
 // 搜索视频函数
 async function searchVideos(query) {
   // 清空之前的结果
@@ -67,7 +74,7 @@ async function searchVideos(query) {
     const allVideos = await response.json();
 
     // 显示前30个结果
-    displayVideos(allVideos.slice(0, 30));
+    displayVideos(allVideos.slice(0, 100));
   } catch (error) {
     console.error('搜索视频出错：', error);
     alert('搜索视频出错，请查看控制台以获取更多信息。');

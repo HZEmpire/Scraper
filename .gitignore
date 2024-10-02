@@ -1,5 +1,6 @@
 .DS_Store
 .env
+action_categories.csv
 
 # node_modules
 node_modules

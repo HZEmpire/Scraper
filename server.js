@@ -52,7 +52,7 @@ app.get('/search_videos', async (req, res) => {
     async function fetchPexelsVideos(query) {
     const apiKey = PEXELS_API_KEY;
     try {
-        const response = await axios.get(`https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=15`, {
+        const response = await axios.get(`https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=45`, {
         headers: {
             Authorization: apiKey,
         },
