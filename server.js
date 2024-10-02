@@ -15,18 +15,98 @@ app.use(express.json());
 // 配置静态文件中间件
 app.use(express.static(path.join(__dirname, "public")));
 
-// 读取 Coverr API Key
+// 读取 API Keys
 const COVER_API_KEY = process.env.COVERR_API_KEY;
+const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
 
-// 调试输出（完成后请移除）
-console.log('Coverr API Key:', COVER_API_KEY);
-
-if (!COVER_API_KEY) {
-    console.error('Error: COVER_API_KEY is not defined. Please set it in your environment variables or .env file.');
-    // 根据需要，您可以选择在此退出程序
-    // process.exit(1);
+// 检查 API Keys
+if (!COVER_API_KEY || !PEXELS_API_KEY) {
+    console.error('Error: API keys are not defined. Please set them in your environment variables or .env file.');
+    // process.exit(1); // 可根据需要选择是否退出程序
 }
 
+// 搜索视频的路由
+app.get('/search_videos', async (req, res) => {
+    const query = req.query.query;
+    if (!query) {
+        return res.status(400).json({ error: 'Missing query parameter' });
+    }
+
+    try {
+        // 调用 Pexels 和 Coverr 的搜索函数
+        const [pexelsVideos, coverrVideos] = await Promise.all([
+        fetchPexelsVideos(query),
+        searchCoverr(query)
+        ]);
+
+        // 合并结果
+        const allVideos = [...pexelsVideos, ...coverrVideos];
+
+        res.json(allVideos);
+    } catch (error) {
+        console.error('搜索视频失败：', error.message);
+        res.status(500).json({ error: '搜索视频失败' });
+    }
+    });
+
+    async function fetchPexelsVideos(query) {
+    const apiKey = PEXELS_API_KEY;
+    try {
+        const response = await axios.get(`https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=15`, {
+        headers: {
+            Authorization: apiKey,
+        },
+        });
+        const data = response.data;
+        return data.videos.map((video) => ({
+        id: video.id,
+        url: video.video_files[0].link,
+        thumbnail: video.image,
+        duration: video.duration,
+        source: "Pexels",
+        }));
+    } catch (error) {
+        console.error('Pexels 搜索错误：', error.message);
+        return [];
+    }
+}
+
+async function searchCoverr(query) {
+    const COVER_API_KEY = process.env.COVERR_API_KEY;
+    try {
+        const response = await axios.get(`https://api.coverr.co/videos?urls=true&query=${encodeURIComponent(query)}`, {
+        headers: {
+            'Authorization': `Bearer ${COVER_API_KEY}`
+        }
+        });
+
+        const data = response.data;
+        const hits = data.hits;
+
+        if (!Array.isArray(hits)) {
+        console.error('Coverr API 返回的数据格式不正确，"hits" 应为数组');
+        return [];
+        }
+
+        // 格式化视频数据
+        const videos = hits.map(video => ({
+        id: video.id || video.objectID,
+        url: video.urls?.mp4_download || '',
+        duration: video.duration || 0,
+        thumbnail: video.thumbnail || video.poster || '',
+        source: 'Coverr',
+        title: video.title || '',
+        description: video.description || ''
+        }));
+
+        return videos;
+    } catch (error) {
+        console.error('Coverr 搜索错误：', error.message);
+        return [];
+    }
+}
+
+// 下载视频的路由
 app.post("/download", async (req, res) => {
     const { query, videos } = req.body;
 
@@ -122,5 +202,5 @@ app.post("/download", async (req, res) => {
 });
 
 app.listen(7655, () => {
-     console.log("Server is running on port 7655.");
+    console.log("Server is running on port 7655.");
 });

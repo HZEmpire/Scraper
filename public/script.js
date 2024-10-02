@@ -58,85 +58,20 @@ async function searchVideos(query) {
   videoResults.innerHTML = "";
   selectedVideos = [];
 
-  // 调用 Pexels API
-  const pexelsVideos = await fetchPexelsVideos(query);
-
-  // 调用 Coverr API
-  const coverrVideos = await searchCoverr(query);
-
-  // 合并结果
-  const allVideos = [...pexelsVideos, ...coverrVideos];
-
-  // 显示前30个结果
-  displayVideos(allVideos.slice(0, 30));
-}
-
-// 调用 Coverr API 搜索视频
-async function searchCoverr(query) {
-  const COVER_API_KEY = "xxx";
   try {
-    const response = await fetch(`https://api.coverr.co/videos?urls=true&query=${encodeURIComponent(query)}`, {
-      headers: {
-        'Authorization': `Bearer ${COVER_API_KEY}`
-      }
-    });
-
+    // 调用服务器端的 /search_videos 接口
+    const response = await fetch(`/search_videos?query=${encodeURIComponent(query)}`);
     if (!response.ok) {
-      throw new Error(`Coverr API Error: ${response.status} ${response.statusText}`);
+      throw new Error(`搜索失败：${response.status} ${response.statusText}`);
     }
+    const allVideos = await response.json();
 
-    const data = await response.json();
-    console.log('Coverr API Response:', data);
-
-    // 获取视频列表
-    const hits = data.hits;
-
-    if (!Array.isArray(hits)) {
-      console.error('Coverr API 返回的数据格式不正确，"hits" 应为数组');
-      return [];
-    }
-
-    // 格式化视频数据
-    const videos = hits.map(video => ({
-      id: video.id || video.objectID,
-      url: video.urls?.mp4_download || '',  // 使用 mp4_download 字段获取下载链接
-      duration: video.duration || 0,
-      thumbnail: video.thumbnail || video.poster || '',
-      source: 'Coverr',
-      title: video.title || '',
-      description: video.description || ''
-    }));
-
-    // 打印格式化后的视频数组
-    console.log('Formatted videos:', videos);
-
-    return videos;
+    // 显示前30个结果
+    displayVideos(allVideos.slice(0, 30));
   } catch (error) {
-    console.error('Coverr search error:', error);
-    return [];
+    console.error('搜索视频出错：', error);
+    alert('搜索视频出错，请查看控制台以获取更多信息。');
   }
-}
-  
-
-// 调用 Pexels API 获取视频
-async function fetchPexelsVideos(query) {
-  const apiKey = "xxx"; // 请替换为您的 Pexels API 密钥
-  const response = await fetch(
-    `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=15`,
-    {
-      headers: {
-        Authorization: apiKey,
-      },
-    }
-  );
-  const data = await response.json();
-  return data.videos.map((video) => ({
-    id: video.id,
-    url: video.video_files[0].link,
-    thumbnail: video.image,
-    duration: video.duration,
-    source: "pexels",
-  }));
 }
 
 // 显示视频结果
