@@ -1,6 +1,7 @@
 .DS_Store
 .env
 action_categories.csv
+rename.ipynb
 
 # node_modules
 node_modules
