@@ -116,8 +116,8 @@ app.get('/search_images', async (req, res) => {
     try {
         // 调用 Pexels 和 Wikimedia 的图片搜索函数
         const [pexelsImages, wikimediaImages] = await Promise.all([
+            searchWikimediaImages(query),
             fetchPexelsImages(query),
-            searchWikimediaImages(query)
         ]);
 
         // 合并结果
