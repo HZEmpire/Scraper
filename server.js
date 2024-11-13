@@ -114,14 +114,14 @@ app.get('/search_images', async (req, res) => {
     }
 
     try {
-        // 调用 Pexels 和 Wikimedia 的图片搜索函数
-        const [pexelsImages, wikimediaImages] = await Promise.all([
+        // 调用 Wikimedia 和 Pexels 的图片搜索函数
+        const [wikimediaImages, pexelsImages] = await Promise.all([
             searchWikimediaImages(query),
-            fetchPexelsImages(query),
+            fetchPexelsImages(query)
         ]);
 
-        // 合并结果
-        const allImages = [...pexelsImages, ...wikimediaImages];
+        // 合并结果，先 Wikimedia，再 Pexels
+        const allImages = [...wikimediaImages, ...pexelsImages];
 
         res.json(allImages);
     } catch (error) {
@@ -137,7 +137,7 @@ async function fetchPexelsImages(query) {
         return [];
     }
     try {
-        const response = await axios.get(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=70`, {
+        const response = await axios.get(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=50`, {
             headers: {
                 Authorization: apiKey,
             },
@@ -164,7 +164,7 @@ async function searchWikimediaImages(query) {
                 prop: 'imageinfo',
                 generator: 'search',
                 gsrnamespace: 6, // 限制搜索到文件命名空间
-                gsrlimit: 100,
+                gsrlimit: 150, // 将结果限制为 150 张图片
                 gsrsearch: query,
                 iiprop: 'url|thumbnail', // 添加 'thumbnail' 属性
                 iiurlwidth: 300, // 指定缩略图宽度

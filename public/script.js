@@ -176,7 +176,7 @@ async function searchImages(query) {
     const allImages = await response.json();
 
     // 显示前100个结果
-    displayImages(allImages.slice(0, 100));
+    displayImages(allImages.slice(0, 200));
   } catch (error) {
     console.error('搜索图片出错：', error);
     alert('搜索图片出错，请查看控制台以获取更多信息。');
@@ -185,7 +185,21 @@ async function searchImages(query) {
 
 // 显示图片结果
 function displayImages(images) {
-  images.forEach((image) => {
+  // 清空之前的结果
+  results.innerHTML = "";
+  selectedItems = [];
+
+  // 分离不同来源的图片
+  const wikimediaImages = images.filter(img => img.source === "Wikimedia Commons");
+  const pexelsImages = images.filter(img => img.source === "Pexels");
+
+  // 限制 Wikimedia 图片数量为 150
+  const displayedWikimediaImages = wikimediaImages.slice(0, 150);
+
+  // 合并图片数组
+  const allImages = [...displayedWikimediaImages, ...pexelsImages];
+
+  allImages.forEach((image) => {
     const imageItem = document.createElement("div");
     imageItem.className = "image-item";
 
