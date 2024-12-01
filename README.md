@@ -1,6 +1,9 @@
 # Image/Video Web Scraper
 This is a simple web scraper that scrapes images or videos from a website and saves them to a file. The websites used in this example are [www.pexels.com](https://www.pexels.com/videos/), [www.coverr.co](https://coverr.co/), and [commons.wikimedia.org](https://commons.wikimedia.org/wiki/Main_Page). The images/videos are saved to a file in the current [data](data) directory.
 
+The User Interface is given as follows:
+![User Interface](demo.png)
+
 ## Installation
 To install the required node modules, run the following command:
 ```bash
